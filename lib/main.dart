@@ -14,9 +14,10 @@ class RadarMapsDemo extends StatefulWidget {
 }
 
 String style = "radar-default-v1";
-String publishableKey = "prj_live_pk_...";
+String publishableKey = "prj_test_pk_...";
 
 class RadarMapsState extends State<RadarMapsDemo> {
+  // map state
   late MaplibreMapController mapController;
   List<Symbol> markers = [];
   bool isCameraMovingProgrammatically = false;
@@ -46,7 +47,7 @@ class RadarMapsState extends State<RadarMapsDemo> {
     mapController.addImage(name, imgBytes);
   }
 
-  // add the marker to the map as a symbol
+  // add the marker to the map at the given LatLng
   void _addMarker(LatLng latLng) async {
     final Symbol marker = await mapController.addSymbol(
       SymbolOptions(
@@ -58,7 +59,7 @@ class RadarMapsState extends State<RadarMapsDemo> {
     markers.add(marker);
   }
 
-  // center map on given lat/lng
+  // center map on given LatLng
   void _centerMapOnPosition(LatLng latLng) {
     setState(() {
       isCameraMovingProgrammatically = true; // user is not moving the map
@@ -69,7 +70,7 @@ class RadarMapsState extends State<RadarMapsDemo> {
         CameraPosition(target: latLng, zoom: 14.0),
       ),
     ).then((_) {
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(Duration(seconds: 1), () { // wait for animation to complete
         setState(() {
           isCameraMovingProgrammatically = false; // camera movement finished
         });
@@ -112,7 +113,7 @@ class RadarMapsState extends State<RadarMapsDemo> {
   }
 
   void _hideInfoWindow() {
-    if (!isCameraMovingProgrammatically) {
+    if (!isCameraMovingProgrammatically && showInfoWindow) {
       setState(() {
         showInfoWindow = false;
       });
@@ -120,9 +121,11 @@ class RadarMapsState extends State<RadarMapsDemo> {
   }
 
   // callback on map initialization
-  void _onMapCreated(MaplibreMapController controller) {
+  void _onMapCreated(MaplibreMapController controller) async {
     mapController = controller;
     mapController.onSymbolTapped.add(_onMarkerTapped);
+    await mapController.setSymbolIconAllowOverlap(true);
+    await mapController.setSymbolIconIgnorePlacement(true);
   }
 
   // callback on may style loaded (initial render)
@@ -154,6 +157,8 @@ class RadarMapsState extends State<RadarMapsDemo> {
                 target: LatLng(40.7342891, -73.9910334), // initial position of the map (Radar HQ)
                 zoom: 12.0,
               ),
+              tiltGesturesEnabled: false,  // disable tilt gestures
+              rotateGesturesEnabled: false,  // disable rotate gestures
               onMapCreated: _onMapCreated,
               onStyleLoadedCallback: _onStyleLoaded,
               onCameraIdle: () => _hideInfoWindow(),
