@@ -14,7 +14,7 @@ class RadarMapsDemo extends StatefulWidget {
 }
 
 String style = "radar-default-v1";
-String publishableKey = "prj_test_pk_...";
+String publishableKey = "prj_live_pk_...";
 
 class RadarMapsState extends State<RadarMapsDemo> {
   // map state
@@ -24,7 +24,7 @@ class RadarMapsState extends State<RadarMapsDemo> {
 
   // state for info window
   LatLng? infoWindowPosition;
-  Symbol? logoMarker;
+  Symbol? hqMarker;
   Symbol? selectedMarker;
   bool showInfoWindow = false;
   String infoWindowText = "";
@@ -81,7 +81,7 @@ class RadarMapsState extends State<RadarMapsDemo> {
   // handle tap on marker
   void _onMarkerTapped(Symbol symbol) {
     String text = "";
-    if (symbol == logoMarker) {
+    if (symbol == hqMarker) {
       text = "Radar HQ";
     } else {
       int index = markers.indexOf(symbol);
@@ -120,6 +120,17 @@ class RadarMapsState extends State<RadarMapsDemo> {
     }
   }
 
+  // add Radar logo to map
+  Widget _buildLogo() {
+    return Container(
+      padding: EdgeInsets.all(8),
+      child: Image.asset(
+        'images/logo.png',
+        width: 74,
+      ),
+    );
+  }
+
   // callback on map initialization
   void _onMapCreated(MaplibreMapController controller) async {
     mapController = controller;
@@ -130,18 +141,18 @@ class RadarMapsState extends State<RadarMapsDemo> {
 
   // callback on may style loaded (initial render)
   void _onStyleLoaded() async {
-    _addImageFromAsset("logo", "images/logo.png");
+    _addImageFromAsset("hq", "images/hq.png");
     _addImageFromAsset("marker", "images/marker.png");
 
     // add Radar logo to the map at HQ
-    final Symbol logo = await mapController.addSymbol(
+    final Symbol hq = await mapController.addSymbol(
       SymbolOptions(
         geometry: LatLng(40.7342891, -73.9910334), // Latitude and Longitude of the marker
-        iconImage: "logo",
+        iconImage: "hq",
         iconSize: 0.5,
       ),
     );
-    logoMarker = logo;
+    hqMarker = hq;
   }
 
   @override
@@ -177,6 +188,13 @@ class RadarMapsState extends State<RadarMapsDemo> {
                   child: _buildInfoWindow(selectedMarker),
                 ),
               ),
+
+            // Radar logo
+            Positioned(
+              left: 10,
+              bottom: 30,
+              child: _buildLogo(),
+            ),
           ]
         ),
       ),
